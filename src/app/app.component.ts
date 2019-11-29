@@ -1,32 +1,127 @@
 import { Component } from '@angular/core';
+import { WebSocketSubject } from 'rxjs/webSocket';
+import { retryWhen, delay, tap } from 'rxjs/operators';
+import { serializeError } from 'serialize-error';
 
 @Component({
   selector: 'app-root',
-  template: `
-    <!--The content below is only a placeholder and can be replaced.-->
-    <div style="text-align:center" class="content">
-      <h1>
-        Welcome to {{title}}!
-      </h1>
-      <span style="display: block">{{ title }} app is running!</span>
-      <img width="300" alt="Angular Logo" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNTAgMjUwIj4KICAgIDxwYXRoIGZpbGw9IiNERDAwMzEiIGQ9Ik0xMjUgMzBMMzEuOSA2My4ybDE0LjIgMTIzLjFMMTI1IDIzMGw3OC45LTQzLjcgMTQuMi0xMjMuMXoiIC8+CiAgICA8cGF0aCBmaWxsPSIjQzMwMDJGIiBkPSJNMTI1IDMwdjIyLjItLjFWMjMwbDc4LjktNDMuNyAxNC4yLTEyMy4xTDEyNSAzMHoiIC8+CiAgICA8cGF0aCAgZmlsbD0iI0ZGRkZGRiIgZD0iTTEyNSA1Mi4xTDY2LjggMTgyLjZoMjEuN2wxMS43LTI5LjJoNDkuNGwxMS43IDI5LjJIMTgzTDEyNSA1Mi4xem0xNyA4My4zaC0zNGwxNy00MC45IDE3IDQwLjl6IiAvPgogIDwvc3ZnPg==">
-    </div>
-    <h2>Here are some links to help you start: </h2>
-    <ul>
-      <li>
-        <h2><a target="_blank" rel="noopener" href="https://angular.io/tutorial">Tour of Heroes</a></h2>
-      </li>
-      <li>
-        <h2><a target="_blank" rel="noopener" href="https://angular.io/cli">CLI Documentation</a></h2>
-      </li>
-      <li>
-        <h2><a target="_blank" rel="noopener" href="https://blog.angular.io/">Angular blog</a></h2>
-      </li>
-    </ul>
-    
-  `,
+  templateUrl: 'app.component.html',
   styles: []
 })
 export class AppComponent {
   title = 'scrum';
+  userName: string;
+  userRole = 'user';
+  clientsNum = 0;
+  cards = [1, 2, 3, 5, 8, 13];
+  voted: string[];
+  ongoing = false;
+  result: string;
+
+  private socket: WebSocketSubject<any>;
+
+  constructor() {}
+
+  get connected() {
+    return this.socket && !this.socket.closed;
+  }
+
+  ping() {
+    this.socket.next('ping');
+  }
+
+  enterRoom() {
+    // const url = new URL('ws://localhost:3000/ws');
+
+    // if (this.userName) {
+    //   url.searchParams.set('name', this.userName);
+    // }
+
+    // if (this.socket && !this.socket.closed) {
+    //   this.socket.complete();
+    // }
+
+    this.socket = new WebSocketSubject({
+      url: 'ws://localhost:3000/ws',
+      deserializer: e => e.data,
+      serializer: e => e
+    });
+
+    setTimeout(() => {
+      this.socket.subscribe(
+          msg => this.messageHandler(msg),
+          err => console.log(JSON.stringify(stringify_object(err))),
+          () => this.socket = null
+      );
+    }, 100);
+  }
+
+  messageHandler(message: string): void {
+    let msg = message;
+
+    if (msg.startsWith('set')) {
+      msg = msg.slice(4);
+      if (msg.startsWith('name')) {
+        msg = msg.slice(5);
+        this.setName(msg);
+      } else if (msg.startsWith('role')) {
+        msg = msg.slice(5);
+        this.setRole(msg);
+      }
+    } else if (msg.startsWith('clients')) {
+      this.clientsNum = parseInt(msg.replace('clients:', ''));
+    } else if (msg.startsWith('election')) {
+      msg = msg.slice(9)
+      if (msg.startsWith('start')) {
+        this.ongoing = true;
+      } else if (msg.startsWith('end')) {
+        this.ongoing = false;
+
+        if (this.userRole === 'admin') {
+          this.result = msg.slice(4)
+        }
+      } else if (msg.startsWith('voted')) {
+        this.voted = JSON.parse(msg.slice(6));
+      }
+    }
+  }
+
+  start() {
+    this.socket.next('election:start');
+  }
+
+  submit(card: string | number) {
+    this.socket.next('card:' + card);
+  }
+
+  private setName(name: string) {
+    this.userName = name;
+  }
+
+  private setRole(role: string) {
+    this.userRole = role;
+  }
+}
+
+function stringify_object(object, depth=0, max_depth=2) {
+  // change max_depth to see more levels, for a touch event, 2 is good
+  if (depth > max_depth)
+      return 'Object';
+
+  const obj = {};
+  for (let key in object) {
+      let value = object[key];
+      if (value instanceof Node)
+          // specify which properties you want to see from the node
+          // @ts-ignore
+          value = {id: value.id};
+      else if (value instanceof Window)
+          value = 'Window';
+      else if (value instanceof Object)
+          value = stringify_object(value, depth+1, max_depth);
+
+      obj[key] = value;
+  }
+
+  return depth? obj: JSON.stringify(obj);
 }

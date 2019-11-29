@@ -7,7 +7,9 @@
     "build": "ng build",
     "test": "ng test",
     "lint": "ng lint",
-    "e2e": "ng e2e"
+    "e2e": "ng e2e",
+    "express": "node express",
+    "express:first": "ng build --prod && node express"
   },
   "private": true,
   "dependencies": {
@@ -19,7 +21,11 @@
     "@angular/platform-browser": "~8.2.14",
     "@angular/platform-browser-dynamic": "~8.2.14",
     "@angular/router": "~8.2.14",
-    "rxjs": "~6.4.0",
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "express-ws": "^4.0.0",
+    "rxjs": "~6.5.3",
+    "serialize-error": "^5.0.0",
     "tslib": "^1.10.0",
     "zone.js": "~0.9.1"
   },
@@ -28,6 +34,8 @@
     "@angular/cli": "~8.3.19",
     "@angular/compiler-cli": "~8.2.14",
     "@angular/language-service": "~8.2.14",
+    "@types/express": "^4.17.2",
+    "@types/express-ws": "^3.0.0",
     "@types/node": "~8.9.4",
     "ts-node": "~7.0.0",
     "tslint": "~5.15.0",

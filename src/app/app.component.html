@@ -1,0 +1,41 @@
+<ng-container *ngIf="connected; else login">
+  <h2>
+    Hello <b>{{ userName }}</b>
+  </h2>
+  <h3>Online: {{ clientsNum }}</h3>
+
+  <hr />
+  <br />
+
+  <ng-container
+    [ngTemplateOutlet]="userRole === 'admin' ? adminTemplate : userTemplate"
+  >
+  </ng-container>
+</ng-container>
+
+<ng-template #login>
+  <input type="text" placeholder="Username" [(ngModel)]="userName" />
+  <br />
+  <br />
+  <button (click)="enterRoom()">Join</button>
+</ng-template>
+
+<ng-template #adminTemplate>
+  Ongoing: {{ ongoing }}
+  <br />
+  Voted:
+  <ng-container *ngFor="let name of voted">{{ name }} </ng-container>
+  <br />
+  Result {{ result }}
+
+  <br /><br />
+  <button (click)="start()">Start</button>
+</ng-template>
+
+<ng-template #userTemplate>
+  <ng-container *ngIf="!ongoing">
+    <button *ngFor="let card of cards" (click)="submit(card)">
+      {{ card }}
+    </button>
+  </ng-container>
+</ng-template>
