@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { WebSocketSubject } from 'rxjs/webSocket';
-import { retryWhen, delay, tap } from 'rxjs/operators';
-import { serializeError } from 'serialize-error';
+import { finalize } from 'rxjs/operators';
 
 @Component({
   selector: 'app-root',
@@ -16,6 +15,7 @@ export class AppComponent {
   cards = [1, 2, 3, 5, 8, 13];
   voted: string[];
   ongoing = false;
+  sentVote = false;
   result: string;
 
   private socket: WebSocketSubject<any>;
@@ -34,6 +34,7 @@ export class AppComponent {
     const url = new URL('ws://localhost:3000/ws');
 
     url.host = location.host;
+    url.port = location.port;
 
     if (this.userName) {
       url.searchParams.set('name', this.userName);
@@ -50,10 +51,11 @@ export class AppComponent {
     });
 
     setTimeout(() => {
-      this.socket.subscribe(
+      this.socket.pipe(
+        finalize(() => this.socket = null)
+      ).subscribe(
           msg => this.messageHandler(msg),
-          err => console.log(JSON.stringify(stringify_object(err))),
-          () => this.socket = null
+          console.error
       );
     }, 100);
   }
@@ -78,6 +80,7 @@ export class AppComponent {
         this.ongoing = true;
       } else if (msg.startsWith('end')) {
         this.ongoing = false;
+        this.sentVote = false;
 
         if (this.userRole === 'admin') {
           this.result = msg.slice(4)
@@ -94,6 +97,7 @@ export class AppComponent {
 
   submit(card: string | number) {
     this.socket.next('card:' + card);
+    this.sentVote = true;
   }
 
   private setName(name: string) {
@@ -103,27 +107,4 @@ export class AppComponent {
   private setRole(role: string) {
     this.userRole = role;
   }
-}
-
-function stringify_object(object, depth=0, max_depth=2) {
-  // change max_depth to see more levels, for a touch event, 2 is good
-  if (depth > max_depth)
-      return 'Object';
-
-  const obj = {};
-  for (let key in object) {
-      let value = object[key];
-      if (value instanceof Node)
-          // specify which properties you want to see from the node
-          // @ts-ignore
-          value = {id: value.id};
-      else if (value instanceof Window)
-          value = 'Window';
-      else if (value instanceof Object)
-          value = stringify_object(value, depth+1, max_depth);
-
-      obj[key] = value;
-  }
-
-  return depth? obj: JSON.stringify(obj);
 }

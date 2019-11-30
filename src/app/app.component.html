@@ -29,11 +29,11 @@
   Result {{ result }}
 
   <br /><br />
-  <button (click)="start()">Start</button>
+  <button *ngIf="!ongoing" (click)="start()">Start</button>
 </ng-template>
 
 <ng-template #userTemplate>
-  <ng-container *ngIf="!ongoing">
+  <ng-container *ngIf="ongoing && !sentVote">
     <button *ngFor="let card of cards" (click)="submit(card)">
       {{ card }}
     </button>

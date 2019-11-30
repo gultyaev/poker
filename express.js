@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const app = express();
 const expressWs = require('express-ws')(app);
-const port = process.env.PORT || 80;
+const port = process.env.PORT || 3000;
 const www = process.env.WWW || './dist/scrum';
 const wss = expressWs.getWss();
 const ips = require('./ip');
@@ -55,7 +55,7 @@ app.ws('/ws', (ws, req) => {
     } else if (msg === 'election:end' && clients.get(ws).role === 'admin') {
       startElection();
     } else if (msg.startsWith('card:')) {
-      addVote(msg.slice(5));
+      addVote(ws, msg.slice(5));
     }
   });
 });
@@ -124,7 +124,11 @@ function endElection() {
     if (clients.get(client).role === 'admin') {
       let total = 0;
 
-      electionResults.forEach(e => (count += e));
+      electionResults.forEach(e => {
+        total += e;
+      });
+
+      console.log('total/size', total / electionResults.size);
 
       client.send(
         'election:end:' +
@@ -164,7 +168,7 @@ function notifyElectionLeft() {
 }
 
 function addVote(ws, vote) {
-  electionResults.set(ws, vote);
+  electionResults.set(ws, isNaN(vote) ? 0 : Number(vote));
 
   if (wss.clients.size - 1 === electionResults.size) {
     endElection();
