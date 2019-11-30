@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, NgZone } from '@angular/core';
 import { WebSocketSubject } from 'rxjs/webSocket';
 import { retryWhen, delay, tap } from 'rxjs/operators';
 import { serializeError } from 'serialize-error';
@@ -20,7 +20,7 @@ export class AppComponent {
 
   private socket: WebSocketSubject<any>;
 
-  constructor() {}
+  constructor(private readonly ngZone: NgZone) {}
 
   get connected() {
     return this.socket && !this.socket.closed;
@@ -49,14 +49,15 @@ export class AppComponent {
 
     setTimeout(() => {
       this.socket.subscribe(
-          msg => this.messageHandler(msg),
-          err => console.log(JSON.stringify(stringify_object(err))),
-          () => this.socket = null
+        msg => this.messageHandler(msg),
+        err => console.log(JSON.stringify(stringify_object(err))),
+        () => () => this.socket = null
       );
     }, 100);
   }
 
   messageHandler(message: string): void {
+    console.log('msg', message);
     let msg = message;
 
     if (msg.startsWith('set')) {
@@ -71,14 +72,14 @@ export class AppComponent {
     } else if (msg.startsWith('clients')) {
       this.clientsNum = parseInt(msg.replace('clients:', ''));
     } else if (msg.startsWith('election')) {
-      msg = msg.slice(9)
+      msg = msg.slice(9);
       if (msg.startsWith('start')) {
         this.ongoing = true;
       } else if (msg.startsWith('end')) {
         this.ongoing = false;
 
         if (this.userRole === 'admin') {
-          this.result = msg.slice(4)
+          this.result = msg.slice(4);
         }
       } else if (msg.startsWith('voted')) {
         this.voted = JSON.parse(msg.slice(6));
@@ -103,25 +104,23 @@ export class AppComponent {
   }
 }
 
-function stringify_object(object, depth=0, max_depth=2) {
+function stringify_object(object, depth = 0, max_depth = 2) {
   // change max_depth to see more levels, for a touch event, 2 is good
-  if (depth > max_depth)
-      return 'Object';
+  if (depth > max_depth) return 'Object';
 
   const obj = {};
   for (let key in object) {
-      let value = object[key];
-      if (value instanceof Node)
-          // specify which properties you want to see from the node
-          // @ts-ignore
-          value = {id: value.id};
-      else if (value instanceof Window)
-          value = 'Window';
-      else if (value instanceof Object)
-          value = stringify_object(value, depth+1, max_depth);
+    let value = object[key];
+    if (value instanceof Node)
+      // specify which properties you want to see from the node
+      // @ts-ignore
+      value = { id: value.id };
+    else if (value instanceof Window) value = 'Window';
+    else if (value instanceof Object)
+      value = stringify_object(value, depth + 1, max_depth);
 
-      obj[key] = value;
+    obj[key] = value;
   }
 
-  return depth? obj: JSON.stringify(obj);
+  return depth ? obj : JSON.stringify(obj);
 }
