@@ -16,10 +16,10 @@ module.exports = function() {
 
       if (alias >= 1) {
         // this single interface has multiple ipv4 addresses
-        res.push(ifname + ':' + alias + ' ' + iface.address);
+        res.push(alias + ' ' + iface.address);
       } else {
         // this interface has only one ipv4 adress
-        res.push(ifname + ' ' + iface.address);
+        res.push(iface.address);
       }
       ++alias;
     });

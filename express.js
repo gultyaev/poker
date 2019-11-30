@@ -72,7 +72,7 @@ app.listen(port, () => {
   console.log(`listening on http://localhost:${port}`);
   console.log('============>');
   console.log('Available at>');
-  ips().forEach(e => console.log(e));
+  ips().forEach(e => console.log('http://' + e + ':' + port));
 });
 
 /** Notifies clients about changes in room size */
