@@ -1,41 +1,80 @@
 <ng-container *ngIf="connected; else login">
-  <h2>
-    Hello <b>{{ userName }}</b>
-  </h2>
-  <h3>Online: {{ clientsNum }}</h3>
+    <h2>
+        Hello <b>{{ userName }}</b>
+    </h2>
+    <h3 (click)="showClientsList = !showClientsList">Online: {{ clientsNum }}</h3>
 
-  <hr />
-  <br />
+    <ng-container *ngIf="showClientsList">
+        <p *ngFor="let name of clientsList"
+           (click)="giveAdmin(name)"
+           [class.client-item--can]="userRole === 'admin'"
+           class="client-item"
+        >
+            {{ name }}
+        </p>
+    </ng-container>
 
-  <ng-container
-    [ngTemplateOutlet]="userRole === 'admin' ? adminTemplate : userTemplate"
-  >
-  </ng-container>
+    <hr/>
+    <br/>
+
+    <ng-container
+            *ngIf="userRole"
+            [ngTemplateOutlet]="userRole === 'admin' ? adminTemplate : userTemplate"
+    ></ng-container>
 </ng-container>
 
 <ng-template #login>
-  <input type="text" placeholder="Username" [(ngModel)]="userName" />
-  <br />
-  <br />
-  <button (click)="enterRoom()">Join</button>
+    <input class="username" type="text" placeholder="Username" [(ngModel)]="userName"/>
+    <button (click)="enterRoom()" class="btn-join">Join</button>
 </ng-template>
 
 <ng-template #adminTemplate>
-  Ongoing: {{ ongoing }}
-  <br />
-  Voted:
-  <ng-container *ngFor="let name of voted">{{ name }} </ng-container>
-  <br />
-  Result {{ result }}
+    <ng-container *ngIf="voted?.length > 0">
+        Voted: {{ voted.length }}
+        <br>
+        <br>
+    </ng-container>
+    <ng-container *ngIf="result != null">
+        Max: <b>{{ max }}</b>
+        <br>
+        Min: <b>{{ min }}</b>
+        <br><br>
+        <span class="text--bigger">Result: <b>{{ result }}</b></span>
+        <br/><br/>
+    </ng-container>
 
-  <br /><br />
-  <button *ngIf="!ongoing" (click)="start()">Start</button>
+    <ng-container *ngIf="clientsNum > 1">
+        <button
+                *ngIf="!ongoing; else wait"
+                (click)="start()"
+                class="btn-join"
+        >Start
+        </button>
+    </ng-container>
+
+    <ng-template #wait>
+        Election has started. Please wait for votes to be made...
+    </ng-template>
 </ng-template>
 
 <ng-template #userTemplate>
-  <ng-container *ngIf="ongoing && !sentVote">
-    <button *ngFor="let card of cards" (click)="submit(card)">
-      {{ card }}
-    </button>
-  </ng-container>
+    <div *ngIf="ongoing; else wait" class="btn-container">
+        <ng-container *ngIf="!sentVote; else sent">
+            <button
+                    *ngFor="let card of cards"
+                    (click)="submit(card)"
+                    class="btn"
+            >
+                {{ card }}
+            </button>
+        </ng-container>
+    </div>
+
+    <ng-template #wait>
+        Wait for election to start...
+    </ng-template>
+
+    <ng-template #sent>
+        You've given your vote. Wait for results...
+    </ng-template>
 </ng-template>

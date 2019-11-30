@@ -1,1 +1,62 @@
 /* You can add global styles to this file, and also import other style files */
+html {
+  background-color: #1291ff;
+  color: white;
+  font-size: 18px;
+  font-family: Roboto, 'Roboto Light', sans-serif;
+}
+
+%btn {
+  border: none;
+  background-color: #fff;
+  color: #1291ff;
+  padding: 0;
+}
+
+.btn {
+  @extend %btn;
+  width: 90px;
+  height: 90px;
+  font-size: 58px;
+}
+
+.btn-container {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-content: space-between;
+  height: 200px;
+  width: 300px;
+  margin: 0 auto;
+}
+
+.username {
+  border: 1px solid black;
+  border-radius: 0;
+  padding: 10px;
+  font-size: 24px;
+  color: #4a4a4a;
+  margin-right: 1rem;
+}
+
+.btn-join {
+  @extend %btn;
+  font-size: 24px;
+  padding: 0.5rem 1rem;
+  color: #4a4a4a;
+  border: 1px solid black;
+}
+
+.text--bigger {
+  font-size: 24px;
+}
+
+.client-item {
+  transition: color .2s;
+
+  &--can:hover {
+    cursor: pointer;
+    color: #c2cb48;
+  }
+}

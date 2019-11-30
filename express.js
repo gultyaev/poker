@@ -17,7 +17,7 @@ app.use(express.static(www));
 console.log(`serving ${www}`);
 
 app.get('/', (req, res) => {
-  res.sendFile('index.html', { root: www });
+  res.sendFile('index.html', {root: www});
 });
 
 /*
@@ -56,6 +56,14 @@ app.ws('/ws', (ws, req) => {
       startElection();
     } else if (msg.startsWith('card:')) {
       addVote(ws, msg.slice(5));
+    } else if (msg.startsWith('set:admin')) {
+      const name = msg.replace('set:admin:', '');
+
+      if (!name) {
+        return;
+      }
+
+      setNewAdmin(ws, JSON.parse(name));
     }
   });
 });
@@ -70,7 +78,9 @@ app.listen(port, () => {
 /** Notifies clients about changes in room size */
 function notifyClientsAmount() {
   console.log('Connected:', wss.clients.size);
-  wss.clients.forEach(client => client.send(`clients:` + wss.clients.size));
+  const clientsNameList = Array.from(clients).map(e => e[1].name);
+  const msg = 'clients:' + wss.clients.size + ':' + JSON.stringify(clientsNameList);
+  wss.clients.forEach(client => client.send(msg));
 }
 
 /**
@@ -101,7 +111,19 @@ function addUser(ws, name) {
  */
 function deleteClient(ws) {
   if (clients.has(ws)) {
+    let isAdmin = false;
+
+    if (clients.get(ws).role === 'admin') {
+      isAdmin = true;
+    }
+
     clients.delete(ws);
+
+    if (isAdmin && clients.size > 0) {
+      const newAdmin = clients.entries().next().value;
+      newAdmin[1].role = 'admin';
+      newAdmin[0].send('set:role:admin');
+    }
   }
   notifyClientsAmount();
 }
@@ -122,18 +144,20 @@ function endElection() {
 
   wss.clients.forEach(client => {
     if (clients.get(client).role === 'admin') {
-      let total = 0;
+      if (electionResults.size === 0) {
+        client.send('election:end:0');
+        return;
+      }
 
-      electionResults.forEach(e => {
-        total += e;
-      });
+      const results = Array.from(electionResults).map(e => e[1]);
+      const total = results.reduce((acc, val) => acc += val, 0);
+      const min = Math.min(...results);
+      const max = Math.max(...results);
+      const res = total / electionResults.size;
 
-      console.log('total/size', total / electionResults.size);
+      console.log('total/size', res);
 
-      client.send(
-        'election:end:' +
-          (electionResults.size > 0 ? total / electionResults.size : 0)
-      );
+      client.send(`election:end:${res}:${min}:${max}`);
     } else {
       client.send('election:end');
     }
@@ -171,8 +195,28 @@ function addVote(ws, vote) {
   electionResults.set(ws, isNaN(vote) ? 0 : Number(vote));
 
   if (wss.clients.size - 1 === electionResults.size) {
+    notifyElectionLeft();
     endElection();
   } else {
     notifyElectionLeft();
+  }
+}
+
+function setNewAdmin(ws, name) {
+  if (!clients.has(ws) || clients.get(ws).role !== 'admin') {
+    return;
+  }
+
+  const oldAdmin = clients.get(ws);
+  oldAdmin.role = 'user';
+  ws.send('set:role:user');
+
+  for (let entry of clients) {
+
+    if (entry[1].name === name) {
+      entry[1].role = 'admin';
+      entry[0].send('set:role:admin');
+      break;
+    }
   }
 }
