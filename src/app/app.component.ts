@@ -47,13 +47,11 @@ export class AppComponent {
       serializer: e => e
     });
 
-    setTimeout(() => {
-      this.socket.subscribe(
-        msg => this.messageHandler(msg),
-        err => console.log(JSON.stringify(stringify_object(err))),
-        () => () => this.socket = null
-      );
-    }, 100);
+    this.socket.subscribe(
+      msg => this.messageHandler(msg),
+      err => console.log(JSON.stringify(stringify_object(err))),
+      () => () => (this.socket = null)
+    );
   }
 
   messageHandler(message: string): void {
@@ -104,7 +102,7 @@ export class AppComponent {
   }
 }
 
-function stringify_object(object, depth = 0, max_depth = 2) {
+function stringify_object(object, depth = 0, max_depth = 10) {
   // change max_depth to see more levels, for a touch event, 2 is good
   if (depth > max_depth) return 'Object';
 
