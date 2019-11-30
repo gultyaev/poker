@@ -31,18 +31,20 @@ export class AppComponent {
   }
 
   enterRoom() {
-    // const url = new URL('ws://localhost:3000/ws');
+    const url = new URL('ws://localhost:3000/ws');
 
-    // if (this.userName) {
-    //   url.searchParams.set('name', this.userName);
-    // }
+    url.host = location.host;
 
-    // if (this.socket && !this.socket.closed) {
-    //   this.socket.complete();
-    // }
+    if (this.userName) {
+      url.searchParams.set('name', this.userName);
+    }
+
+    if (this.socket && !this.socket.closed) {
+      this.socket.complete();
+    }
 
     this.socket = new WebSocketSubject({
-      url: 'ws://localhost:3000/ws',
+      url: url.toString(),
       deserializer: e => e.data,
       serializer: e => e
     });
