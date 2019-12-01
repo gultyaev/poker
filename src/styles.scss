@@ -1,15 +1,27 @@
+:root {
+  --color: white;
+  --bg-color: #1291ff;
+  --border-color: black;
+
+  @media (prefers-color-scheme: dark) {
+    $color: darken(white, 40);
+    --color: #{$color};
+    --bg-color: #4a4a4a;
+  }
+}
+
 /* You can add global styles to this file, and also import other style files */
 html {
-  background-color: #1291ff;
-  color: white;
+  background-color: var(--bg-color);
+  color: var(--color);
   font-size: 18px;
   font-family: Roboto, 'Roboto Light', sans-serif;
 }
 
 %btn {
   border: none;
-  background-color: #fff;
-  color: #1291ff;
+  background-color: var(--color);
+  color: var(--bg-color);
   padding: 0;
 }
 
@@ -32,11 +44,12 @@ html {
 }
 
 .username {
-  border: 1px solid black;
+  border: 1px solid var(--border-color);
   border-radius: 0;
   padding: 10px;
   font-size: 24px;
-  color: #4a4a4a;
+  color: var(--bg-color);
+  background-color: var(--color);
   margin-right: 1rem;
 }
 
@@ -44,8 +57,7 @@ html {
   @extend %btn;
   font-size: 24px;
   padding: 0.5rem 1rem;
-  color: #4a4a4a;
-  border: 1px solid black;
+  border: 1px solid var(--border-color);
 }
 
 .text--bigger {
