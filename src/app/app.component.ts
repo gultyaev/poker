@@ -20,11 +20,17 @@ export class AppComponent {
     result: string;
     min: string;
     max: string;
+    muted = false;
 
     private voteSound = new Audio('assets/sound.mp3');
     private socket: WebSocketSubject<any>;
 
     constructor() {
+        const muted = localStorage.getItem('muted');
+
+        if (muted) {
+            this.muted = JSON.parse(muted);
+        }
     }
 
     get connected() {
@@ -119,6 +125,15 @@ export class AppComponent {
         this.showClientsList = false;
     }
 
+    toggleMuted() {
+        this.muted = !this.muted;
+        localStorage.setItem('muted', JSON.stringify(this.muted));
+
+        if (this.muted && this.voteSound.currentTime > 0) {
+            this.stop();
+        }
+    }
+
     private setName(name: string) {
         this.userName = name;
     }
@@ -139,6 +154,10 @@ export class AppComponent {
     }
 
     private play() {
+        if (this.muted) {
+            return;
+
+        }
         this.voteSound.play();
     }
 

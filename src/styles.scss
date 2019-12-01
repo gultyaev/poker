@@ -72,3 +72,22 @@ html {
     color: #c2cb48;
   }
 }
+
+.volume-level {
+  width: 30px;
+  height: auto;
+}
+
+.volume-container {
+  width: 35px;
+  height: 35px;
+  display: inline-flex;
+  align-content: center;
+  justify-content: center;
+  vertical-align: bottom;
+  margin-left: 1rem;
+
+  &:hover {
+    cursor: pointer;
+  }
+}

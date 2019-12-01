@@ -1,6 +1,10 @@
 <ng-container *ngIf="connected; else login">
     <h2>
         Hello <b>{{ userName }}</b>
+        <span (click)="toggleMuted()" class="volume-container" [ngSwitch]="muted">
+            <img *ngSwitchCase="true" src="assets/svg/volume_mute.svg" alt="">
+            <img *ngSwitchDefault src="assets/svg/volume_up.svg" alt="">
+        </span>
     </h2>
     <h3 (click)="showClientsList = !showClientsList">Online: {{ clientsNum }}</h3>
 
