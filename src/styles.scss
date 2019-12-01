@@ -10,12 +10,25 @@
   }
 }
 
-/* You can add global styles to this file, and also import other style files */
+* {
+  box-sizing: border-box;
+}
+
+h2 {
+  margin-top: 0;
+}
+
 html {
   background-color: var(--bg-color);
   color: var(--color);
   font-size: 18px;
   font-family: Roboto, 'Roboto Light', sans-serif;
+}
+
+body {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 1rem;
 }
 
 %btn {
@@ -27,9 +40,14 @@ html {
 
 .btn {
   @extend %btn;
-  width: 90px;
-  height: 90px;
+  width: 85px;
+  height: 85px;
   font-size: 58px;
+
+  @media (min-width: 375px) {
+    width: 100px;
+    height: 100px;
+  }
 }
 
 .btn-container {
@@ -38,9 +56,14 @@ html {
   flex-wrap: wrap;
   justify-content: space-between;
   align-content: space-between;
-  height: 200px;
-  width: 300px;
+  height: 185px;
+  width: 280px;
   margin: 0 auto;
+
+  @media (min-width: 375px) {
+    height: 220px;
+    width: 340px;
+  }
 }
 
 .username {
@@ -51,6 +74,8 @@ html {
   color: var(--bg-color);
   background-color: var(--color);
   margin-right: 1rem;
+  margin-bottom: 1rem;
+  max-width: 100%;
 }
 
 .btn-join {
