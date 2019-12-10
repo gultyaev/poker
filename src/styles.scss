@@ -19,7 +19,9 @@ h2 {
 }
 
 html {
+  background-color: #1291ff;
   background-color: var(--bg-color);
+  color: white;
   color: var(--color);
   font-size: 18px;
   font-family: Roboto, 'Roboto Light', sans-serif;
@@ -33,7 +35,9 @@ body {
 
 %btn {
   border: none;
+  background-color: white;
   background-color: var(--color);
+  color: #1291ff;
   color: var(--bg-color);
   padding: 0;
 }
@@ -67,11 +71,15 @@ body {
 }
 
 .username {
-  border: 1px solid var(--border-color);
+  border: 1px solid;
+  border-color: black;
+  border-color: var(--border-color);
   border-radius: 0;
   padding: 10px;
   font-size: 24px;
+  color: #1291ff;
   color: var(--bg-color);
+  background-color: white;
   background-color: var(--color);
   margin-right: 1rem;
   margin-bottom: 1rem;
@@ -82,7 +90,9 @@ body {
   @extend %btn;
   font-size: 24px;
   padding: 0.5rem 1rem;
-  border: 1px solid var(--border-color);
+  border: 1px solid;
+  border-color: black;
+  border-color: var(--border-color);
 }
 
 .text--bigger {
@@ -90,7 +100,7 @@ body {
 }
 
 .client-item {
-  transition: color .2s;
+  transition: color 0.2s;
 
   &--can:hover {
     cursor: pointer;
